@@ -12,6 +12,10 @@ resource "aws_lambda_function" "my_lambda" {
   handler          = "app.lambda_handler"
   runtime          = "python3.9"
 
+  layers = [
+    aws_lambda_layer_version.plotly_pandas_numpy.arn
+  ]
+
   environment {
     variables = {ListOfUsers_table = aws_dynamodb_table.ListOfUsers.name}
 }
@@ -21,6 +25,14 @@ resource "aws_lambda_function" "my_lambda" {
 resource "aws_lambda_function_url" "lambda_url" {
   function_name      = aws_lambda_function.my_lambda.function_name
   authorization_type = "NONE"  # o "AWS_IAM"
+}
+
+resource "aws_lambda_layer_version" "plotly_pandas_numpy" {
+  layer_name  = "plotly_pandas_numpy"
+  description = "Layer con pandas e plotly"
+  compatible_runtimes = ["python3.9"]
+  s3_bucket   = var.bucket_name
+  s3_key      = "layer.zip"
 }
 
 
