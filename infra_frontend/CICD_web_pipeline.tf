@@ -4,7 +4,7 @@
 
 # Bucket S3 per artifact store
 resource "aws_s3_bucket" "artifact_bucket" {
-  bucket = "${var.pipeline_name}-artifact-store"
+  bucket = var.bucket_name
   tags = local.tags
 }
 
