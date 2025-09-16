@@ -1,0 +1,24 @@
+#!/bin/bash
+# Aggiorno pacchetti
+yum update -y
+
+# Installing CodeDeploy Agent
+sudo yum install -y ruby wget
+wget https://aws-codedeploy-eu-central-1.s3.eu-central-1.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+
+# Checking CodeDeploy Agent status
+sudo service codedeploy-agent status
+
+# Installo Apache
+yum install -y httpd
+
+# Abilito Apache al boot
+systemctl enable httpd
+
+# Avvio Apache
+systemctl start httpd
+
+# Creo una pagina index semplice
+echo "<html><h1>Benvenuto su EC2 Web Server!</h1></html>" > /var/www/html/index.html

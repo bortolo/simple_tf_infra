@@ -1,0 +1,21 @@
+#!/bin/bash
+# Aggiorno pacchetti
+yum update -y
+
+# Installing CodeDeploy Agent
+sudo yum install -y ruby wget
+wget https://aws-codedeploy-eu-central-1.s3.eu-central-1.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+
+# Aggiorno pacchetti
+amazon-linux-extras install -y nginx1
+
+# Abilito Nginx al boot
+systemctl enable nginx
+
+# Avvio Nginx
+systemctl start nginx
+
+# Creo una pagina index semplice
+echo "<html><h1>Benvenuto su EC2 con Nginx!</h1></html>" > /usr/share/nginx/html/index.html
