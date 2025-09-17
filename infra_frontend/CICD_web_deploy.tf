@@ -23,9 +23,9 @@ resource "aws_codedeploy_deployment_group" "foo" {
   #deployment_config_name = aws_codedeploy_deployment_config.foo.id
 
   ec2_tag_filter {
-    key   = "Application"
+    key   = "Name"
     type  = "KEY_AND_VALUE"
-    value = "MyAngularProject"
+    value = "npv_web_app"
   }
 
 }

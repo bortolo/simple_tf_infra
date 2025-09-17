@@ -21,6 +21,26 @@ variable "github_url" {
   type    = string
 }
 
+variable "python_run_time" {
+  type    = string
+}
+
+variable "libs_layers" {
+  type    = string
+}
+
+variable "codebuild_name_layer" {
+  type    = string
+}
+
+variable "layer_name" {
+  type    = string
+}
+
+variable "layer_s3_path" {
+  type    = string
+}
+
 variable "test_alias" {
   type    = string
 }
