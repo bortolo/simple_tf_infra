@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: $LAMBDA_PY_RUNTIME
+  build:
+    commands:
+      - python3 --version
+      - pip3 --version
+      - echo ">>> Creazione cartella layer"
+      - mkdir -p python
+      - echo ">>> Installazione delle dipendenze $LIBS_LAYER"
+      - pip3 install $LIBS_LAYER -t python/
+      - echo ">>> Creazione zip del layer"
+      - zip -r $LAYER_FILE_NAME.zip python
+      - echo ">>> Deploy diretto su Lambda Layer"
+      - |
+        LAYER_ARN=$(aws lambda publish-layer-version \
+          --layer-name $LAYER_FILE_NAME \
+          --zip-file fileb://$LAYER_FILE_NAME.zip \
+          --compatible-runtimes python"$LAMBDA_PY_RUNTIME" \
+          --region $AWS_REGION \
+          --query 'LayerVersionArn' --output text)
+        echo "Nuovo Layer ARN: $LAYER_ARN"
+      - echo ">>> Aggiornamento configurazione della Lambda $LAMBDA_ARN"
+      - |
+        aws lambda update-function-configuration \
+          --function-name "$LAMBDA_ARN" \
+          --layers "$LAYER_ARN"
+      
+artifacts:
+  files:
+    - $LAYER_FILE_NAME.zip
