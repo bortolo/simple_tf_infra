@@ -5,12 +5,12 @@ INTERTEMPO=0
 DIFF_FE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 
-BACKEND_CONFIG_FILE=./infra_backend/terraform.tfvars
+BACKEND_CONFIG_FILE=./infra_backend_layers/terraform.tfvars
 BUCKET_BACKEND=$(awk -F'=' '/^bucket_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
 L_LAYERS_BACKEND=$(awk -F'=' '/^codebuild_name_layer/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
 
 
-terraform -chdir=./infra_backend apply -auto-approve
+terraform -chdir=./infra_backend_layers apply -auto-approve
 DIFF_BE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 

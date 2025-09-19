@@ -4,7 +4,7 @@ SECONDS=0  # reset timer
 FRONTEND_CONFIG_FILE=./infra_frontend/terraform.tfvars
 BUCKET_FRONTEND=$(awk -F'=' '/^bucket_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$FRONTEND_CONFIG_FILE")
 
-BACKEND_CONFIG_FILE=./infra_backend/terraform.tfvars
+BACKEND_CONFIG_FILE=./infra_backend_layer/terraform.tfvars
 BUCKET_BACKEND=$(awk -F'=' '/^bucket_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
 
 # Ricordarsi di disattivari eventuali VPN per lanciare i comandi aws s3
@@ -21,7 +21,7 @@ DIFF_FE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 
 
-terraform -chdir=./infra_backend destroy -auto-approve
+terraform -chdir=./infra_backend_layers destroy -auto-approve
 DIFF_BE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 
