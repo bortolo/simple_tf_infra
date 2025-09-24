@@ -72,6 +72,7 @@ resource "aws_api_gateway_resource" "all" {
   for_each = {
     status = "status"
     graph  = "graph"
+    save   = "save"
   }
 
   rest_api_id = aws_api_gateway_rest_api.private_api.id
@@ -84,6 +85,7 @@ resource "aws_api_gateway_method" "all" {
   for_each = {
     get_status  = { resource = "status", method = "GET" }
     post_graph  = { resource = "graph", method = "POST" }
+    post_save  = { resource = "save", method = "POST" }
   }
 
   rest_api_id   = aws_api_gateway_rest_api.private_api.id
@@ -97,6 +99,7 @@ resource "aws_api_gateway_integration" "all" {
   for_each = {
     lambda_status = { resource = "status", method = "get_status", lambda = aws_lambda_function.my_lambda.invoke_arn }
     lambda_graph  = { resource = "graph", method = "post_graph", lambda = aws_lambda_function.my_lambda.invoke_arn }
+    lambda_save  = { resource = "save", method = "post_save", lambda = aws_lambda_function.my_lambda.invoke_arn }
   }
 
   rest_api_id             = aws_api_gateway_rest_api.private_api.id
