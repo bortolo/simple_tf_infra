@@ -11,8 +11,8 @@ resource "aws_key_pair" "this" {
 module "webserver" {
   source = "terraform-aws-modules/ec2-instance/aws"
 
-  name                        = "webserver"
-  ami                         = "ami-0e6a13e7a5b66ff4d" #Amazon Linux 2
+  name                        = "npv_web_app"
+  ami                         = "ami-0444794b421ec32e4" # Amazon Linux 2023 kernel-6.1 AMI
   instance_type               = "t2.micro"
   availability_zone           = element(module.vpc.azs, 0)
   subnet_id                   = element(module.vpc.public_subnets, 0)
@@ -27,16 +27,14 @@ module "webserver" {
 
 
   enable_volume_tags = false
-  root_block_device = [
-    {
+  root_block_device = {
       encrypted   = false
       volume_type = "gp2"
       volume_size = 8
       tags = {
         Name = "my-root-block"
       }
-    },
-  ]
+    }
 
     tags = local.tags
 

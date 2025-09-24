@@ -22,3 +22,7 @@ systemctl start httpd
 
 # Creo una pagina index semplice
 echo "<html><h1>Benvenuto su EC2 Web Server!</h1></html>" > /var/www/html/index.html
+
+# Installa Node.js (ECS AMI o Amazon Linux 2)
+curl -sL https://rpm.nodesource.com/setup_18.x | bash -
+yum install -y nodejs

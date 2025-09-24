@@ -37,6 +37,13 @@ resource "aws_iam_role_policy" "ec2_policy" {
         Resource = [
           "*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "apigateway:GET"
+        ]
+        Resource = "*"
       }
     ]
   })

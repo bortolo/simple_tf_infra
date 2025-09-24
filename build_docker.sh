@@ -12,7 +12,7 @@ BUILD_PROJECT_NAME=arn:aws:codebuild:eu-central-1:152371567679:project/"$CODEBUI
 terraform -chdir=./infra_backend_docker apply -auto-approve
 
 # aspetto che parta la build (altrimenti non entra nel ciclo)
-sleep 10
+sleep 15
 
 # controllo che finisca la build
 while true; do
