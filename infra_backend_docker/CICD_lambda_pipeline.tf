@@ -55,10 +55,46 @@ resource "aws_codepipeline" "my_pipeline" {
       provider         = "CodeBuild"
       version          = "1"
       input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]   # Salvo per storico lo zip su un S3
+      output_artifacts = ["build_test_output"]   # Salvo per storico lo zip su un S3
 
       configuration = {
         ProjectName = aws_codebuild_project.docker_build.name
+      }
+    }
+  }
+
+  stage {
+    name = "ApprovalToProd"
+
+    action {
+      name      = "ManualApproval"
+      category  = "Approval"
+      owner     = "AWS"
+      provider  = "Manual"
+      version   = "1"
+      run_order = 1
+
+      # opzionale: puoi aggiungere un messaggio per chi approva
+      configuration = {
+        CustomData = "Approve to deploy to PROD environment?"
+      }
+    }
+  }
+
+  stage {
+    name = "BuildAndDeployProd"
+
+    action {
+      name             = "Build"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      version          = "1"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["build_prod_output"]   # Salvo per storico lo zip su un S3
+
+      configuration = {
+        ProjectName = aws_codebuild_project.docker_build_prod.name
       }
     }
   }

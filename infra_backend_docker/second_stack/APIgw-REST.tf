@@ -57,12 +57,32 @@ resource "aws_api_gateway_stage" "prod_stage" {
   stage_name    = "prod"
   rest_api_id   = aws_api_gateway_rest_api.private_api.id
   deployment_id = aws_api_gateway_deployment.private_api_deploy.id
+
+    variables = {
+    lambdaAlias = "prod"
+  }
+
+}
+
+resource "aws_api_gateway_stage" "test_stage" {
+  stage_name    = "test"
+  rest_api_id   = aws_api_gateway_rest_api.private_api.id
+  deployment_id = aws_api_gateway_deployment.private_api_deploy.id
+
+    variables = {
+    lambdaAlias = "test"
+  }
+
 }
 
 resource "aws_lambda_permission" "apigw_rest" {
+  for_each = {
+    test = "test"
+    prod  = "prod"
+  }
   statement_id  = "AllowAPIGatewayInvokeREST"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.my_lambda.arn
+  function_name = "${aws_lambda_function.my_lambda.arn}:${each.value}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.private_api.execution_arn}/*/*" # Questo permette qualsiasi stage e qualsiasi metodo della tua API di invocare la Lambda
 }
@@ -94,12 +114,47 @@ resource "aws_api_gateway_method" "all" {
   authorization = "NONE"
 }
 
-# Integrations
+# # Integrations
+# resource "aws_api_gateway_integration" "all" {
+#   for_each = {
+#     lambda_status = { resource = "status", method = "get_status", lambda = aws_lambda_function.my_lambda.invoke_arn }
+#     lambda_graph  = { resource = "graph", method = "post_graph", lambda = aws_lambda_function.my_lambda.invoke_arn }
+#     lambda_save  = { resource = "save", method = "post_save", lambda = aws_lambda_function.my_lambda.invoke_arn }
+#   }
+
+#   rest_api_id             = aws_api_gateway_rest_api.private_api.id
+#   resource_id             = aws_api_gateway_resource.all[each.value.resource].id
+#   http_method             = aws_api_gateway_method.all[each.value.method].http_method
+#   integration_http_method = "POST"
+#   type                    = "AWS_PROXY"
+#   uri                     = each.value.lambda
+# }
+
+# Integrations per API Gateway usando alias
+# resource "aws_api_gateway_integration" "all" {
+#   for_each = {
+#     lambda_status_prod = { resource = "status", method = "get_status", lambda = aws_lambda_alias.prod_lambda_alias.invoke_arn }
+#     lambda_graph_prod  = { resource = "graph", method = "post_graph", lambda = aws_lambda_alias.prod_lambda_alias.invoke_arn }
+#     lambda_save_prod   = { resource = "save", method = "post_save", lambda = aws_lambda_alias.prod_lambda_alias.invoke_arn }
+
+#     lambda_status_test = { resource = "status", method = "get_status", lambda = aws_lambda_alias.test_lambda_alias.invoke_arn }
+#     lambda_graph_test  = { resource = "graph", method = "post_graph", lambda = aws_lambda_alias.test_lambda_alias.invoke_arn }
+#     lambda_save_test   = { resource = "save", method = "post_save", lambda = aws_lambda_alias.test_lambda_alias.invoke_arn }
+#   }
+
+#   rest_api_id             = aws_api_gateway_rest_api.private_api.id
+#   resource_id             = aws_api_gateway_resource.all[each.value.resource].id
+#   http_method             = aws_api_gateway_method.all[each.value.method].http_method
+#   integration_http_method = "POST"
+#   type                    = "AWS_PROXY"
+#   uri                     = each.value.lambda
+# }
+
 resource "aws_api_gateway_integration" "all" {
   for_each = {
-    lambda_status = { resource = "status", method = "get_status", lambda = aws_lambda_function.my_lambda.invoke_arn }
-    lambda_graph  = { resource = "graph", method = "post_graph", lambda = aws_lambda_function.my_lambda.invoke_arn }
-    lambda_save  = { resource = "save", method = "post_save", lambda = aws_lambda_function.my_lambda.invoke_arn }
+    lambda_status = { resource = "status", method = "get_status" }
+    lambda_graph  = { resource = "graph", method = "post_graph" }
+    lambda_save   = { resource = "save", method = "post_save" }
   }
 
   rest_api_id             = aws_api_gateway_rest_api.private_api.id
@@ -107,8 +162,13 @@ resource "aws_api_gateway_integration" "all" {
   http_method             = aws_api_gateway_method.all[each.value.method].http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = each.value.lambda
+  # uri                     = "arn:aws:lambda:eu-central-1:152371567679:function:my_lambda:$${stageVariables.lambdaAlias}/invocations"
+  uri = "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:152371567679:function:my_lambda_container:$${stageVariables.lambdaAlias}/invocations"
+
+  # API Gateway stage variables, che sono variabili “runtime” disponibili solo al momento della chiamata. L’URI dell’integration 
+  # può includere ${stageVariables.<nome>} e API Gateway sostituirà quella variabile con il valore definito nello stage corrispondente.
 }
+
 
 # /status -----------------------------------
 

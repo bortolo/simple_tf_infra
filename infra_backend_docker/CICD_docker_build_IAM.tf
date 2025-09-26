@@ -48,7 +48,10 @@ resource "aws_iam_role_policy" "codebuild_policy_layers" {
           "lambda:PublishLayerVersion",
           "lambda:UpdateFunctionConfiguration",
           "lambda:GetLayerVersion",
-          "lambda:UpdateFunctionCode"
+          "lambda:UpdateFunctionCode",
+          "lambda:PublishVersion",
+          "lambda:UpdateAlias",
+          "lambda:GetFunctionConfiguration"
         ],
         Resource = "*"
       },

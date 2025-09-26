@@ -1,0 +1,21 @@
+Comandi utili per interagire con AWS
+
+## Sapere quantità di log e log groups registrati al momento
+
+# Tabella descrittiva di tutti i log groups
+aws logs describe-log-groups --query "logGroups[*].[logGroupName,storedBytes]" --output table
+
+# Somma totale dei GB log salvati al momento
+aws logs describe-log-groups --query "sum(logGroups[].storedBytes)" --output text | awk '{printf "%.2f GB\n", $1/1024/1024/1024}'
+
+# Costi log
+1) Ingestione log: circa 0.57 USD per GB di dati scritti dentro CloudWatch Logs.
+2) Storage log: circa 0.03 USD per GB/mese per i log conservati oltre il mese corrente.
+3) Archiviazione a lungo termine (se imposti retention > 1 mese): circa 0.012 USD per GB/mese dopo il primo mese.
+4) Interrogazioni (Insights queries): circa 0.005 USD per GB scansionato.
+
+# Free tier per log groups
+1) 10 log metrics gratuite al mese.
+2) 5 GB di log data ingestion al mese gratuiti.
+3) 5 GB di archiviazione log al mese gratuita.
+4) 1.000.000 di richieste API gratuite al mese.
