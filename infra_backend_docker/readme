@@ -1,8 +1,0 @@
-# Per preparare lo zip dei layers
-mkdir python
-python3 -m venv venv 
-source venv/bin/activate
-pip install pandas plotly numpy -t python/
-zip -r layer.zip python
-aws s3 cp layer.zip s3://simple-lambda-bucket-for-artifacts/layer.zip # Da fare senza VPN attenzione
-rm -rf venv

@@ -1,15 +1,18 @@
 #!/bin/bash
 SECONDS=0  # reset timer
+terraform -chdir=./infra_frontend init
 terraform -chdir=./infra_frontend apply -auto-approve
 INTERTEMPO=0
 DIFF_FE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 
-BACKEND_CONFIG_FILE=./infra_backend_docker/terraform.tfvars
-CODEBUILD_BACKEND=$(awk -F'=' '/^codebuild_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
+BACKEND_CONFIG_FILE=./infra_backend_docker/01-CICD_lambda_docker_image/var_owned.auto.tfvars
+BUCKET_BACKEND=$(awk -F'=' '/^bucket_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
+CODEBUILD_BACKEND=$(awk -F'=' '/^docker_build_name/ {gsub(/"/,"",$2); gsub(/ /,"",$2); print $2}' "$BACKEND_CONFIG_FILE")
 BUILD_PROJECT_NAME=arn:aws:codebuild:eu-central-1:152371567679:project/"$CODEBUILD_BACKEND"
 
-terraform -chdir=./infra_backend_docker apply -auto-approve
+terraform -chdir=./infra_backend_docker/01-CICD_lambda_docker_image init
+terraform -chdir=./infra_backend_docker/01-CICD_lambda_docker_image apply -auto-approve
 
 # aspetto che parta la build (altrimenti non entra nel ciclo)
 sleep 15
@@ -27,9 +30,20 @@ while true; do
 done
 
 
-terraform -chdir=./infra_backend_docker/second_stack init
-terraform -chdir=./infra_backend_docker/second_stack import aws_codebuild_project.docker_build $BUILD_PROJECT_NAME
-terraform -chdir=./infra_backend_docker/second_stack apply -auto-approve
+terraform -chdir=./infra_backend_docker/02-lambda_and_dynamo init
+terraform -chdir=./infra_backend_docker/02-lambda_and_dynamo apply -auto-approve
+
+# Ora che ho creato la lambda function con una prima immagine posso creare la CICD definitiva
+terraform -chdir=./infra_backend_docker/03-CICD_lambda_deployment init
+terraform -chdir=./infra_backend_docker/03-CICD_lambda_deployment apply -auto-approve
+terraform -chdir=./infra_backend_docker/04-api_gw init
+terraform -chdir=./infra_backend_docker/04-api_gw apply -auto-approve
+
+terraform -chdir=./infra_frontend output
+terraform -chdir=./infra_backend_docker/02-lambda_and_dynamo output
+terraform -chdir=./infra_backend_docker/03-CICD_lambda_deployment output
+terraform -chdir=./infra_backend_docker/04-api_gw output
+
 DIFF_BE=$((SECONDS-INTERTEMPO))
 INTERTEMPO=$SECONDS
 
