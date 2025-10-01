@@ -1,0 +1,67 @@
+# ROLE POLICY ==============================================================
+
+resource "aws_iam_role" "codepipeline_role" {
+  name = "${var.pipeline_name}-Role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
+      Principal = {
+        Service = "codepipeline.amazonaws.com"
+      }
+    }]
+  })
+
+    tags = local.tags
+}
+
+# Attacca policy al ruolo di CodePipeline
+resource "aws_iam_role_policy" "codepipeline_policy" {
+  role = aws_iam_role.codepipeline_role.id
+  name = "${var.pipeline_name}-Policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ],
+        Resource = [
+          "${data.aws_s3_bucket.bucket.arn}/*",
+          "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+        ]
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "codebuild:StartBuild",
+          "codebuild:BatchGetBuilds"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "codestar-connections:*"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# RESOURCE POLICY ====================================================
